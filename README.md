@@ -1,6 +1,6 @@
 # Vois AI: Multi-Language Voice Detection API
 
-Veritas AI is a secure REST API designed to distinguish between **Human** and **AI-Generated** voices. It specifically supports five languages: Tamil, English, Hindi, Malayalam, and Telugu.
+Vois AI is a secure REST API designed to distinguish between **Human** and **AI-Generated** voices. It specifically supports five languages: Tamil, English, Hindi, Malayalam, and Telugu.
 
 ## 🚀 Features
 * **Multi-Language Support:** Optimized for Dravidian and Indo-Aryan linguistic patterns.
@@ -13,6 +13,16 @@ Veritas AI is a secure REST API designed to distinguish between **Human** and **
 * **AI Logic:** Librosa & NumPy
 * **Frontend:** HTML5 / CSS3 (Glassmorphism) / Vanilla JS
 
+ # Installation & Setup
+
+## Clone the repo: git clone https://github.com/your-username/VoiceDetector.git
+
+## Install deps: pip install -r requirements.txt
+
+## Run: uvicorn main:app --reload
+
+## _
+
 ## 📂 Folder Structure
 ```text
 VoiceDetector/
@@ -23,10 +33,5 @@ VoiceDetector/
 ├── requirements.txt  # Python Dependencies
 └── Procfile          # Deployment Instructions for Cloud
 
-#Installation & Setup
 
-Clone the repo: git clone https://github.com/your-username/VoiceDetector.git
 
-Install deps: pip install -r requirements.txt
-
-Run: uvicorn main:app --reload
