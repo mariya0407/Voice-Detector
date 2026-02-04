@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice AI | Voice Authentication</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --glass-bg: rgba(30, 41, 59, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --accent: #38bdf8;
+            --accent-glow: rgba(56, 189, 248, 0.3);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --success: #22c55e;
+            --danger: #ef4444;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(circle at 10% 20%, rgba(56, 189, 248, 0.15) 0%, transparent 40%),
+                              radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.15) 0%, transparent 40%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            padding: 2rem;
+        }
+
+        .card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        h1 {
+            font-weight: 300;
+            letter-spacing: -0.5px;
+            margin-bottom: 0.5rem;
+            font-size: 1.8rem;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Upload Area */
+        .upload-box {
+            border: 2px dashed var(--glass-border);
+            border-radius: 16px;
+            padding: 2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-box:hover, .upload-box.dragover {
+            border-color: var(--accent);
+            background: rgba(56, 189, 248, 0.05);
+        }
+
+        .upload-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--text-muted);
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .file-name {
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            color: var(--accent);
+            display: none;
+        }
+
+        /* Controls */
+        .controls {
+            display: grid;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        select, button {
+            width: 100%;
+            padding: 1rem;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            background: rgba(15, 23, 42, 0.6);
+            color: var(--text-main);
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        button {
+            background: var(--accent);
+            color: #0f172a;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 25px var(--accent-glow);
+        }
+
+        button:disabled {
+            background: var(--text-muted);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Result Section */
+        #result-area {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--glass-border);
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .badge-ai {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+        }
+
+        .badge-human {
+            background: rgba(34, 197, 94, 0.2);
+            color: var(--success);
+            border: 1px solid rgba(34, 197, 94, 0.4);
+        }
+
+        .score-bar {
+            height: 6px;
+            background: var(--glass-border);
+            border-radius: 3px;
+            margin: 1rem 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .score-fill {
+            height: 100%;
+            background: var(--accent);
+            width: 0%;
+            transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .explanation {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(15, 23, 42, 0.3);
+            border-radius: 50%;
+            border-top-color: #0f172a;
+            animation: spin 1s ease-in-out infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="card">
+        <h1>Vois AI</h1>
+        <div class="subtitle">Deepfake Audio Detection System</div>
+
+        <div class="upload-box" id="drop-area" onclick="document.getElementById('fileInput').click()">
+            <div class="upload-icon">📂</div>
+            <div>Click or Drop MP3 Here</div>
+            <div class="file-name" id="fileName">No file selected</div>
+            <input type="file" id="fileInput" accept=".mp3">
+        </div>
+
+        <div class="controls">
+            <select id="languageSelect">
+                <option value="English">English</option>
+                <option value="Tamil">Tamil</option>
+                <option value="Hindi">Hindi</option>
+                <option value="Malayalam">Malayalam</option>
+                <option value="Telugu">Telugu</option>
+            </select>
+
+            <button id="analyzeBtn" onclick="analyzeAudio()">
+                <span id="btnText">Analyze Audio</span>
+                <div class="spinner" id="spinner"></div>
+            </button>
+        </div>
+
+        <div id="result-area">
+            <div id="classificationBadge" class="badge">PENDING</div>
+            <h2 id="confidenceText" style="margin: 0; font-size: 2.5rem;">0%</h2>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">CONFIDENCE SCORE</div>
+            
+            <div class="score-bar">
+                <div class="score-fill" id="scoreFill"></div>
+            </div>
+            
+            <p class="explanation" id="explanationText">Waiting for analysis...</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_URL = "/api/voice-detection";
+    const API_KEY = "sk_test_123456789"; // Hardcoded for demo, usually keep safe!
+    let selectedFile = null;
+
+    // File Handling
+    const dropArea = document.getElementById('drop-area');
+    const fileInput = document.getElementById('fileInput');
+    const fileNameDisplay = document.getElementById('fileName');
+
+    fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
+    
+    // Drag & Drop visual effects
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropArea.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            dropArea.classList.add('dragover');
+        }, false);
+    });
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            dropArea.classList.remove('dragover');
+        }, false);
+    });
+    dropArea.addEventListener('drop', (e) => handleFile(e.dataTransfer.files[0]), false);
+
+    function handleFile(file) {
+        if (file && file.name.endsWith('.mp3')) {
+            selectedFile = file;
+            fileNameDisplay.textContent = file.name;
+            fileNameDisplay.style.display = 'block';
+        } else {
+            alert('Please select a valid MP3 file.');
+        }
+    }
+
+    // Convert to Base64
+    const toBase64 = file => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = error => reject(error);
+    });
+
+    async function analyzeAudio() {
+        if (!selectedFile) {
+            alert("Please upload a file first.");
+            return;
+        }
+
+        // UI Loading State
+        const btn = document.getElementById('analyzeBtn');
+        const spinner = document.getElementById('spinner');
+        const btnText = document.getElementById('btnText');
+        const resultArea = document.getElementById('result-area');
+        
+        btn.disabled = true;
+        btnText.style.display = 'none';
+        spinner.style.display = 'block';
+        resultArea.style.display = 'none';
+
+        try {
+            const base64Audio = await toBase64(selectedFile);
+            
+            const payload = {
+                language: document.getElementById('languageSelect').value,
+                audioFormat: "mp3",
+                audioBase64: base64Audio
+            };
+
+            const response = await fetch(API_URL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "x-api-key": API_KEY
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+
+            // Render Results
+            resultArea.style.display = 'block';
+            const badge = document.getElementById('classificationBadge');
+            const scoreFill = document.getElementById('scoreFill');
+            
+            document.getElementById('confidenceText').innerText = (data.confidenceScore * 100).toFixed(0) + "%";
+            document.getElementById('explanationText').innerText = data.explanation;
+
+            // Animate Score Bar
+            setTimeout(() => {
+                scoreFill.style.width = (data.confidenceScore * 100) + "%";
+            }, 100);
+
+            if (data.classification === "AI_GENERATED") {
+                badge.innerText = "AI GENERATED";
+                badge.className = "badge badge-ai";
+                scoreFill.style.backgroundColor = "#ef4444";
+            } else {
+                badge.innerText = "HUMAN VOICE";
+                badge.className = "badge badge-human";
+                scoreFill.style.backgroundColor = "#22c55e";
+            }
+
+        } catch (error) {
+            alert("Error analyzing audio: " + error);
+        } finally {
+            // Reset Button
+            btn.disabled = false;
+            btnText.style.display = 'inline';
+            spinner.style.display = 'none';
+        }
+    }
+</script>
+
+</body>
+</html>
