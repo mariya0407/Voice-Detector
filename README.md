@@ -1,4 +1,4 @@
-# Veritas AI: Multi-Language Voice Detection API
+# Vois AI: Multi-Language Voice Detection API
 
 Veritas AI is a secure REST API designed to distinguish between **Human** and **AI-Generated** voices. It specifically supports five languages: Tamil, English, Hindi, Malayalam, and Telugu.
 
